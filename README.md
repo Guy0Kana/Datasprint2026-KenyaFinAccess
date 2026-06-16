@@ -15,31 +15,52 @@ Using data from the **2024 FinAccess Household Survey**, the objective was to bu
 
 The project combines exploratory data analysis, feature engineering, predictive modelling, and policy-focused recommendations to identify the factors most strongly associated with financial wellbeing.
 
----
+
 
 ## Problem Statement
 
-Financial wellbeing is a key component of economic resilience and social development. Understanding the factors associated with changes in financial status can help policymakers, financial institutions, and development organizations design more effective interventions.
+Financial inclusion has expanded significantly in Kenya over the past decade, particularly through mobile money and digital financial services. However, access to financial services does not necessarily translate into improved financial wellbeing.
 
-This project seeks to answer:
+This project seeks to answer two key questions:
 
-> Which demographic, financial behaviour, and financial health factors are most strongly associated with a Kenyan household's self-reported financial status?
+> Can an individual's financial status be predicted using demographic, behavioural, and financial-health characteristics?
 
----
+> Which factors are most strongly associated with improved, stable, or deteriorating financial outcomes?
+
+Understanding these relationships can help stakeholders design interventions that strengthen household resilience and improve financial wellbeing.
+
+
 
 ## Dataset
 
-Source:
-- Kaggle dataset provided for DataSprint 2026
+### Source
 
-### Dataset Summary
+- FinAccess 2024 Household Survey
+- Published by:
+  - Central Bank of Kenya (CBK)
+  - Kenya National Bureau of Statistics (KNBS)
+  - FSD Kenya
 
-- 20,871 respondents
-- 28 variables
-- Multiclass target variable:
-  - Improved (20.5%)
-  - Stayed the Same (26.9%)
-  - Worsened (52.6%)
+### Dataset Characteristics
+
+| Attribute | Value |
+|------------|--------|
+| Observations | 20,871 |
+| Variables | 28 |
+| Target Classes | 3 |
+| Missing Values | Primarily in `barriers_bank` |
+
+### Target Variable
+
+`financial_status`
+
+| Class | Proportion |
+|---------|---------|
+| Worsened | 52.6% |
+| Stayed the Same | 26.9% |
+| Improved | 20.5% |
+
+The target variable is imbalanced, with over half of respondents reporting that their financial situation worsened.
 
 ### Feature Categories
 
@@ -66,57 +87,141 @@ Source:
 - Emergency Fund Access
 - Financial Difficulty Indicators
 
----
 
-## Project Workflow
 
-### 1. Data Cleaning
+## Methodology
 
-- Missing values in `barriers_bank` were filled with `"No barrier"`
-- Data types were inspected and validated
-- Categorical variables were encoded for modelling
+The project followed a structured machine learning workflow consisting of six stages:
 
-### 2. Exploratory Data Analysis (EDA)
+### 1. Data Understanding
 
-Key areas explored:
+The dataset was examined to understand:
 
-- Target class distribution
+- Variable types
+- Category distributions
+- Missing values
+- Potential data quality issues
+- Class imbalance
+
+Special attention was given to understanding the socioeconomic meaning of variables rather than treating them purely as modelling inputs.
+
+### 2. Data Cleaning
+
+Several preprocessing steps were performed:
+
+- Missing values in `barriers_bank` were filled with `"No barrier"` as specified in the competition brief.
+- Duplicate records were checked.
+- Variable formats were standardized.
+- Categorical values were reviewed for consistency.
+
+### 3. Exploratory Data Analysis (EDA)
+
+EDA focused on identifying patterns and relationships associated with financial status.
+
+Areas explored included:
+
 - Demographic characteristics
+- Income distribution
 - Financial inclusion indicators
-- Financial resilience indicators
-- Relationships between predictors and financial status
+- Mobile money usage
+- Financial literacy
+- Emergency fund access
+- Shock exposure
+- Financial health indicators
 
-### 3. Feature Engineering
+Cross-tabulations and proportional visualizations were used extensively to compare financial outcomes across groups.
 
-Three derived features were created:
+Statistical tests, including Chi-Square tests of independence and Cramér's V, were used where appropriate to assess the strength of observed relationships.
+
+### 4. Feature Engineering
+
+Several derived variables were created to improve interpretability and modelling performance.
 
 #### Income Band
 
-Monthly income was grouped into meaningful income categories to improve interpretability.
+Monthly income was grouped into socioeconomic categories to reduce the influence of extreme values and capture threshold effects.
 
 #### Resilience Score
 
-A composite measure combining:
+A composite score was constructed using:
 
 - Shock exposure
 - Emergency fund access
 - Financial health indicators
+- Financial difficulty indicators
 
 Higher values indicate stronger financial resilience.
 
 #### Financial Access Score
 
-A composite measure representing the degree of participation in formal financial services.
+A composite measure representing participation in formal financial services, including:
 
----
+- Formal savings
+- Formal loans
+- Mobile money access
+- Formal service usage
+
+The goal was to distinguish financial access from financial resilience and evaluate their relative importance.
+
+### 5. Model Development
+
+Three supervised machine learning algorithms were evaluated:
+
+#### Logistic Regression
+
+Used as a baseline model due to its simplicity and interpretability.
+
+#### Random Forest
+
+Used to capture non-linear relationships and feature interactions.
+
+#### XGBoost
+
+Used as the final ensemble model because of its strong performance on structured tabular data.
+
+### 6. Model Interpretation
+
+Feature importance analysis was conducted using XGBoost to identify the variables contributing most strongly to predictions.
+
+This step helped translate model outputs into actionable insights and recommendations.
+
+
+
 
 ## Data Leakage Assessment
 
-Several financial health variables were assessed for potential target leakage due to their conceptual similarity to the target variable.
+Several financial health variables were assessed for potential target leakage due to their conceptual similarity to the target variable, including:
+
+- `nfhi_12`
+- `nfhi_13`
+- `accessto_13k_1month`
+- `not_difficult`
 
 Cross-tabulation analysis showed meaningful associations with financial status, but no evidence of near-perfect target separation. These variables were therefore retained while being interpreted cautiously during model evaluation.
 
----
+
+
+## Exploratory Data Analysis Highlights
+
+Several important findings emerged during EDA.
+
+### Financial Resilience Outperformed Financial Access
+
+Variables related to financial resilience showed stronger and more consistent relationships with financial status than variables related to financial access.
+
+### Emergency Fund Access Was Highly Informative
+
+Respondents who could raise KES 13,000 in an emergency were substantially more likely to report stable or improving financial conditions.
+
+### Mobile Money Access Showed a Weak Relationship
+
+Although statistically significant, the relationship between mobile money access and financial status was weak, suggesting that access alone does not guarantee improved financial outcomes.
+
+### Financial Literacy Produced Mixed Results
+
+Financial literacy scores displayed a less consistent relationship with financial outcomes than expected, indicating that knowledge alone may not translate into financial resilience.
+
+
 
 ## Models Evaluated
 
@@ -132,7 +237,7 @@ Used to capture non-linear relationships and feature interactions.
 
 Used as the final ensemble model due to its strong performance on structured tabular data.
 
----
+
 
 ## Evaluation Metric
 
@@ -144,7 +249,6 @@ Models were therefore evaluated using:
 
 This metric balances precision and recall while accounting for class imbalance.
 
----
 
 ## Results
 
@@ -158,7 +262,18 @@ XGBoost achieved the best overall performance, although all three models produce
 
 This suggests that financial status is a complex and multidimensional outcome influenced by factors that may not be fully captured in the survey data.
 
----
+
+## Feature Importance
+
+Feature importance extracted from the XGBoost model identified the strongest predictors of financial status.
+
+### Most Important Features
+
+1. Resilience Score
+2. Marital Status
+3. Financial Access Score
+4. Age
+5. Income Band
 
 ## Key Findings
 
@@ -171,15 +286,6 @@ The strongest predictors of financial status were related to:
 - Financial wellbeing
 
 Access-related variables such as mobile money access and financial literacy showed weaker relationships with financial outcomes.
-
-### Top Predictors
-
-- Resilience Score
-- Marital Status
-- Education Level
-- Age
-- Financial Access Score
-- Monthly Income
 
 ---
 
