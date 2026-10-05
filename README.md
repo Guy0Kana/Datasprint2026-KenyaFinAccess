@@ -336,4 +336,4 @@ Access-related variables such as mobile money access and financial literacy show
 
 ## Author
 
-Developed for **DataSprint 2026** by the Strathmore Data Community.
+Developed for **DataSprint 2026** by the Kana Guyo Godana.
